@@ -1,4 +1,7 @@
+import json
 import config
+from google import genai
+from google.genai import types
 
 def generate_content(paper):
     """
@@ -8,8 +11,57 @@ def generate_content(paper):
     if config.LLM_PROVIDER == 'mock':
         return _mock_generation(paper)
     
-    # TODO: 実際のLLM呼び出しを実装 (OpenAI/Gemini)
+    if config.LLM_PROVIDER == 'gemini':
+        return _gemini_generation(paper)
+    
+    # Fallback to mock if unknown provider
     return _mock_generation(paper)
+
+def _gemini_generation(paper):
+    """Geminiを使用してコンテンツを生成します。"""
+    client = genai.Client(api_key=config.LLM_API_KEY)
+    
+    title = paper.get('title', '無題の論文')
+    url = paper.get('url', '')
+    
+    prompt = f"""
+    あなたはプロのハンドボール指導者かつ研究者です。
+    以下の論文について、指導者向けの解説コンテンツを作成してください。
+    
+    論文タイトル: {title}
+    URL: {url}
+    
+    以下の3つの要素を含むJSON形式で出力してください。
+    
+    1. x_draft: X（旧Twitter）への投稿用下書き
+       - headline: 興味を惹く見出し（【】で囲む）
+       - summary: 140字以内の要約（重要）
+       - url: 論文URL
+       - full_text: 見出し、要約、URLを含む投稿全文
+       
+    2. discord_summary: Discordチャンネルへの投稿用（Markdown形式）
+       - 指導者向けの詳細な要約
+       - 対象、方法、結果、現場での活用方法などを箇条書きで分かりやすく
+       
+    3. slide_prompt: スライド生成AI（GammaやNano Banana Proなど）への指示プロンプト
+       - この論文の内容をスライド化するための構成案
+       - タイトル、ターゲット、各スライドの要点（導入、研究内容、結果、アクション）
+       
+    JSONのキーは必ず "x_draft", "discord_summary", "slide_prompt" としてください。
+    """
+    
+    try:
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
+        return json.loads(response.text)
+    except Exception as e:
+        print(f"Gemini generation failed: {e}")
+        return _mock_generation(paper)
 
 def _mock_generation(paper):
     """テスト用のダミーコンテンツを返します。"""

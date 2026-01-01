@@ -9,8 +9,13 @@ DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL", "")
 
 # LLM設定
 # APIキーのプレースホルダー (例: OPENAI_API_KEY, GEMINI_API_KEY)
-LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "mock") # mock, openai, gemini
+# GitHub Actionsでは GOOGLE_API_KEY として設定される
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+LLM_API_KEY = os.getenv("LLM_API_KEY", GOOGLE_API_KEY)
+
+# GOOGLE_API_KEY がある場合はデフォルトで gemini を使用
+DEFAULT_PROVIDER = "gemini" if GOOGLE_API_KEY else "mock"
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", DEFAULT_PROVIDER) # mock, openai, gemini
 
 # パス設定
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
