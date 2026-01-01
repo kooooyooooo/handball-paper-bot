@@ -1,0 +1,42 @@
+name: AI Issue Solver
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  auto-response:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Python 3.11を使う（3.10の警告対策）
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 新しいGoogle公式ライブラリを入れる
+      - name: Install dependencies
+        run: pip install google-genai
+
+      # 【重要】ここでPythonコードを書くのではなく、ファイルを実行する
+      - name: Generate solution with Gemini
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        # さっき作ったスクリプトを呼び出して、結果を response.txt に保存
+        run: python .github/scripts/solve_issue.py > response.txt
+
+      - name: Comment on Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body-file response.txt
