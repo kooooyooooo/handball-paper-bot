@@ -78,7 +78,15 @@ GitHub リポジトリの **Settings > Secrets and variables > Actions** から�
 ### 2. ワークフローの内容
 
 - **実行タイミング**: 毎日 07:00 JST (`0 22 * * *` UTC)
-- **手動実行**: [Actions] タブから `Daily Paper Bot` を選択し、`Run workflow` ボタンからいつでも実行可能です。
+- **手動実行の手順**:
+    - **GitHub UI**:
+        1. リポジトリの **Actions** タブを開く。
+        2. 左側のリストから **Daily Paper Bot** を選択する。
+        3. `Run workflow` ボタンをクリックし、ブランクを選択して `Run workflow` を実行。
+    - **GitHub CLI**:
+        ```bash
+        gh workflow run daily_bot.yml
+        ```
 
 ### 3. ソースコードの変更
 
