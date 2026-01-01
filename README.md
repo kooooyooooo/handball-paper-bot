@@ -59,6 +59,28 @@
    ```
 
 3. **実行**
+
    ```bash
    python src/main.py
    ```
+
+## GitHub Actions での自動実行
+
+本プロジェクトは GitHub Actions を使用して、毎日決まった時間に自動で論文を処理・通知するように設定されています。
+
+### 1. リポジトリ秘密情報（Secrets）の設定
+
+GitHub リポジトリの **Settings > Secrets and variables > Actions** から、以下の `Repository secrets` を登録してください：
+
+- **`DISCORD_WEBHOOK_URL`**: 送信先の Discord Webhook URL
+- **`GOOGLE_API_KEY`**: Gemini API を使用するための API キー
+
+### 2. ワークフローの内容
+
+- **実行タイミング**: 毎日 07:00 JST (`0 22 * * *` UTC)
+- **手動実行**: [Actions] タブから `Daily Paper Bot` を選択し、`Run workflow` ボタンからいつでも実行可能です。
+
+### 3. ソースコードの変更
+
+GitHub Actions 上では自動的に `LLM_PROVIDER=gemini` が設定され、Gemini による実生成が動作します。
+
